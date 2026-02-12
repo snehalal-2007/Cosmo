@@ -20,7 +20,7 @@ export function MiniMap() {
 
   return (
     <motion.div
-      className="absolute bottom-4 left-4 z-10 flex flex-col gap-3 rounded-xl border border-white/10 bg-black/40 p-3 backdrop-blur-md"
+      className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/40 p-3 backdrop-blur-md"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3, duration: 0.4 }}

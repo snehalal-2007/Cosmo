@@ -7,7 +7,7 @@ import { RealismToggle } from './RealismToggle'
 export function HUD() {
   return (
     <motion.div
-      className="absolute left-4 top-4 z-10 flex flex-col gap-4 rounded-xl border border-white/10 bg-black/40 p-4 backdrop-blur-md"
+      className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/40 p-4 backdrop-blur-md"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.2, duration: 0.4 }}

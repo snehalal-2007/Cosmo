@@ -5,7 +5,7 @@
 import './index.css'
 import { Canvas } from '@react-three/fiber'
 import { Scene } from './components/canvas'
-import { HUD, TimeControlPanel, InfoPanel, MiniMap } from './components/ui'
+import { HUD, TimeControlPanel, InfoPanel, MiniMap, PlanetNav } from './components/ui'
 import { useSimulationStore } from './store'
 
 function App() {
@@ -25,10 +25,15 @@ function App() {
       >
         <Scene />
       </Canvas>
-      <HUD />
+      <div className="absolute left-4 top-4 bottom-4 z-10 flex w-56 min-w-[12rem] flex-col justify-between">
+        <HUD />
+        <div className="flex flex-1 items-center justify-start">
+          <PlanetNav />
+        </div>
+        <MiniMap />
+      </div>
       <TimeControlPanel />
       <InfoPanel />
-      <MiniMap />
     </div>
   )
 }

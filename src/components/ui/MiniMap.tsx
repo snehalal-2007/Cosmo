@@ -3,12 +3,44 @@
  */
 import { motion } from 'framer-motion'
 import { useSimulationStore } from '../../store'
-import { PLANETS_DATA, PLANET_IDS } from '../../data/planets'
-import { orbitAngleRad } from '../../data/planets'
-import { getVisualOrbitRadius } from '../../data/planets'
+import {
+  PLANETS_DATA,
+  PLANET_IDS,
+  PLANET_COLORS,
+  orbitAngleRad,
+  getVisualOrbitRadius,
+} from '../../data/planets'
 
 const SUN_R = 6
 const PLANET_R = 3
+/** Asteroid belt between Mars (~1.52 AU) and Jupiter (~5.2 AU); inner ~2.2 AU, outer ~3.2 AU. */
+const ASTEROID_BELT_INNER_AU = 2.2
+const ASTEROID_BELT_OUTER_AU = 3.2
+
+/** SVG ring (annulus) for the asteroid belt in Overview. */
+function AsteroidBeltRing({
+  cx,
+  cy,
+  innerR,
+  outerR,
+}: {
+  cx: number
+  cy: number
+  innerR: number
+  outerR: number
+}) {
+  const outerPath = `M ${cx + outerR} ${cy} A ${outerR} ${outerR} 0 1 1 ${cx - outerR} ${cy} A ${outerR} ${outerR} 0 1 1 ${cx + outerR} ${cy}`
+  const innerPath = `M ${cx + innerR} ${cy} A ${innerR} ${innerR} 0 1 0 ${cx - innerR} ${cy} A ${innerR} ${innerR} 0 1 0 ${cx + innerR} ${cy}`
+  return (
+    <path
+      d={`${outerPath} Z ${innerPath} Z`}
+      fill="rgba(180,160,120,0.22)"
+      fillRule="evenodd"
+      stroke="rgba(200,180,140,0.45)"
+      strokeWidth="0.6"
+    />
+  )
+}
 
 export function MiniMap() {
   const simulationTimeDays = useSimulationStore((s) => s.simulationTimeDays)
@@ -47,6 +79,13 @@ export function MiniMap() {
               />
             )
           })}
+          {/* Asteroid belt (ring between Mars and Jupiter) */}
+          <AsteroidBeltRing
+            cx={60}
+            cy={60}
+            innerR={getVisualOrbitRadius(ASTEROID_BELT_INNER_AU) * norm}
+            outerR={getVisualOrbitRadius(ASTEROID_BELT_OUTER_AU) * norm}
+          />
           {/* Sun */}
           <circle cx="60" cy="60" r={SUN_R} fill="#fff5e0" opacity={0.9} />
           {/* planets */}
@@ -62,8 +101,9 @@ export function MiniMap() {
                 cx={x}
                 cy={y}
                 r={PLANET_R}
-                fill="currentColor"
-                className="text-white/80"
+                fill={PLANET_COLORS[id]}
+                stroke="rgba(255,255,255,0.35)"
+                strokeWidth="0.5"
               />
             )
           })}

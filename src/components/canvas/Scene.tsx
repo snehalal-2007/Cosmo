@@ -9,7 +9,7 @@ import { useThree } from '@react-three/fiber'
 import { Stars, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Sun } from './Sun'
-import { Planet } from './Planet'
+import { Planet, PlanetEarthDirectLoaderTest } from './Planet'
 import { Moon } from './Moon'
 import { SaturnRings } from './SaturnRings'
 import { OrbitPath } from './OrbitPath'
@@ -86,17 +86,19 @@ export function Scene() {
 
       {PLANET_IDS.map((id) => {
         const data = PLANETS_DATA[id]
-        return (
-          <Planet
-            key={id}
-            planetId={id}
-            planetName={data.name}
-            orbitRadius={getOrbitRadius(data.distanceAU)}
-            size={getSize(data.sizeRelative)}
-            orbitalPeriodDays={data.orbitalPeriodDays}
-            rotationPeriodDays={data.rotationPeriodDays}
-            inclinationDeg={data.inclinationDeg}
-          />
+        const planetProps = {
+          planetId: id,
+          planetName: data.name,
+          orbitRadius: getOrbitRadius(data.distanceAU),
+          size: getSize(data.sizeRelative),
+          orbitalPeriodDays: data.orbitalPeriodDays,
+          rotationPeriodDays: data.rotationPeriodDays,
+          inclinationDeg: data.inclinationDeg,
+        }
+        return id === 'earth' ? (
+          <PlanetEarthDirectLoaderTest key={id} {...planetProps} />
+        ) : (
+          <Planet key={id} {...planetProps} />
         )
       })}
 

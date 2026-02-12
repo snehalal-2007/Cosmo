@@ -1,12 +1,11 @@
 /**
- * Cosmo – PBR material for Moon. Crater detail, no atmosphere, strong contrast.
- * Explicitly loads diffuse.jpg when not provided so the map always applies.
+ * Cosmo – PBR material for Moon. Map = preloadedMap ?? hook textures.map.
  */
 import { useMemo } from 'react'
 import { Color } from 'three'
 import type { Texture } from 'three'
-import { useMoonTextures, useOptionalTexture } from '../../../hooks/usePlanetTextures'
-import { DIFFUSE_TEXTURE_URLS, MOON_MATERIAL_CONFIG } from '../../../data/planetTextures'
+import { useMoonTextures } from '../../../hooks/usePlanetTextures'
+import { MOON_MATERIAL_CONFIG } from '../../../data/planetTextures'
 
 type MoonPBRMaterialProps = {
   preloadedMap?: Texture | null
@@ -15,8 +14,7 @@ type MoonPBRMaterialProps = {
 export function MoonPBRMaterial({ preloadedMap = null }: MoonPBRMaterialProps) {
   const textures = useMoonTextures()
   const config = MOON_MATERIAL_CONFIG
-  const explicitDiffuse = useOptionalTexture(DIFFUSE_TEXTURE_URLS.moon, true)
-  const map = preloadedMap ?? textures.map ?? explicitDiffuse
+  const map = preloadedMap ?? textures.map
   const { normalMap, roughnessMap } = textures
 
   const color = useMemo(

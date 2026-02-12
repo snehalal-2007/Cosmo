@@ -76,6 +76,13 @@ function loadOne(
   })
 }
 
+function resolveUrl(path: string): string {
+  if (typeof window !== 'undefined' && path.startsWith('/')) {
+    return new URL(path, window.location.origin).href
+  }
+  return path
+}
+
 export function TexturePreloadProvider({ children }: { children: ReactNode }) {
   const [textures, setTextures] = useState<TextureMap>(defaultTextures)
 
@@ -84,29 +91,37 @@ export function TexturePreloadProvider({ children }: { children: ReactNode }) {
     let cancelled = false
 
     async function loadAll() {
-      for (const id of BODY_IDS) {
-        if (cancelled) break
+      const loadPromises = BODY_IDS.map(async (id) => {
         const path = DIFFUSE_TEXTURE_URLS[id]
-        const url =
-          typeof window !== 'undefined' && path.startsWith('/')
-            ? new URL(path, window.location.origin).href
-            : path
+        const url = resolveUrl(path)
         const tex = await loadOne(loader, url)
-        if (cancelled && tex) {
-          tex.dispose()
-          break
-        }
-        if (tex) {
-          setTextures((prev) => ({ ...prev, [id]: tex }))
-        }
+        return { id, tex }
+      })
+
+      const results = await Promise.all(loadPromises)
+      if (cancelled) {
+        results.forEach((r) => r.tex?.dispose())
+        return
+      }
+
+      const next: TextureMap = { ...defaultTextures }
+      results.forEach(({ id, tex }) => {
+        if (tex) next[id] = tex
+      })
+      setTextures({ ...next })
+
+      const loadedKeys = Object.keys(next).filter((k) => next[k as keyof TextureMap] != null) as (PlanetId | 'moon')[]
+      console.log('Loaded textures:', loadedKeys)
+      const expected: (PlanetId | 'moon')[] = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'moon']
+      const missing = expected.filter((k) => !loadedKeys.includes(k))
+      if (missing.length > 0) {
+        console.warn('Missing texture keys (check URLs):', missing)
       }
     }
     loadAll()
 
     return () => {
       cancelled = true
-      // Do not dispose textures here: they are owned by React state. Disposing them
-      // would corrupt the context (e.g. under Strict Mode) and prevent planets from rendering.
     }
   }, [])
 

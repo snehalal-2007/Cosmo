@@ -135,7 +135,7 @@ export const PLANET_MATERIAL_CONFIG: Record<PlanetId, PlanetMaterialConfig> = {
     color: PLANET_COLORS.earth,
     roughness: 0.7,
     metalness: 0.05,
-    hasClouds: true,
+    hasClouds: false,
     hasAtmosphere: true,
   },
   mars: {

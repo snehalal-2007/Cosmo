@@ -25,14 +25,13 @@ function App() {
       >
         <Scene />
       </Canvas>
-      <div className="absolute left-4 top-4 bottom-4 z-10 flex w-56 min-w-[12rem] flex-col justify-between">
+      <div className="absolute left-4 top-4 bottom-4 z-10 flex w-56 min-w-[12rem] flex-col gap-4">
         <HUD />
-        <div className="flex flex-1 items-center justify-start">
-          <PlanetNav />
-        </div>
+        <TimeControlPanel />
+        <div className="min-h-4 flex-1" />
         <MiniMap />
       </div>
-      <TimeControlPanel />
+      <PlanetNav />
       <InfoPanel />
     </div>
   )

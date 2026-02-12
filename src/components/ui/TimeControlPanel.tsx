@@ -63,7 +63,7 @@ export function TimeControlPanel() {
 
   return (
     <motion.div
-      className="absolute right-4 top-4 z-10 flex w-56 flex-col gap-4 rounded-xl border border-white/10 bg-black/40 p-4 backdrop-blur-md"
+      className="flex w-full flex-col gap-4 rounded-xl border border-white/10 bg-black/40 p-4 backdrop-blur-md"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.2, duration: 0.4 }}

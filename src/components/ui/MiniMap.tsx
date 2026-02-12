@@ -52,17 +52,17 @@ export function MiniMap() {
 
   return (
     <motion.div
-      className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/40 p-3 backdrop-blur-md"
+      className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/40 p-3 backdrop-blur-md items-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3, duration: 0.4 }}
     >
-      <div className="text-xs font-medium text-white/80">Overview</div>
+      <div className="text-xs font-medium text-white/80 w-full">Overview</div>
       <div
-        className="relative h-28 w-28 rounded-full border border-white/15 bg-white/5"
+        className="relative h-28 w-28 rounded-full border border-white/15 bg-white/5 flex-shrink-0"
         style={{ minWidth: 120, minHeight: 120 }}
       >
-        <svg className="h-full w-full" viewBox="0 0 120 120">
+        <svg className="h-full w-full block" viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet">
           {/* orbits */}
           {PLANET_IDS.map((id) => {
             const r = getVisualOrbitRadius(PLANETS_DATA[id].distanceAU) * norm

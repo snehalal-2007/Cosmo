@@ -19,8 +19,8 @@ export const BASE_URL = _base || '/'
 /** Path prefix for textures: /textures when at root, or /subpath/textures when base is set. */
 const TEXTURE_BASE = _base ? `${_base}/textures` : '/textures'
 
-/** Single source of truth: diffuse.jpg path per body. Keys must match planet IDs and "moon" exactly (lowercase). */
-export const DIFFUSE_TEXTURE_URLS: Record<PlanetId | 'moon', string> = {
+/** Single source of truth: diffuse.jpg path per body. Keys must match planet IDs, "moon", and "sun" (lowercase). */
+export const DIFFUSE_TEXTURE_URLS: Record<PlanetId | 'moon' | 'sun', string> = {
   mercury: `${TEXTURE_BASE}/mercury/diffuse.jpg`,
   venus: `${TEXTURE_BASE}/venus/diffuse.jpg`,
   earth: `${TEXTURE_BASE}/earth/diffuse.jpg`,
@@ -30,6 +30,7 @@ export const DIFFUSE_TEXTURE_URLS: Record<PlanetId | 'moon', string> = {
   uranus: `${TEXTURE_BASE}/uranus/diffuse.jpg`,
   neptune: `${TEXTURE_BASE}/neptune/diffuse.jpg`,
   moon: `${TEXTURE_BASE}/moon/diffuse.jpg`,
+  sun: `${TEXTURE_BASE}/sun/diffuse.jpg`,
 }
 
 export type PlanetTextureSet = {

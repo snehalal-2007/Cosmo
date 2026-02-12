@@ -4,11 +4,10 @@
  */
 import { useRef, useMemo } from 'react'
 import { Group, Mesh, Vector3 } from 'three'
-import { useFrame, useLoader } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { motion } from 'framer-motion'
-import { TextureLoader } from 'three'
 import { getOrbitPositionWithInclination } from '../../utils/orbit'
 import { useSimulationStore } from '../../store'
 import { orbitAngleRad, rotationAngleRad } from '../../data/planets'
@@ -17,71 +16,6 @@ import { PLANET_MATERIAL_CONFIG } from '../../data/planetTextures'
 import { usePreloadedTexture } from '../../contexts/TexturePreloadContext'
 import { usePlanetTextures } from '../../hooks/usePlanetTextures'
 import { PlanetPBRMaterial, EarthAtmosphere, EarthCloudLayer } from './materials'
-
-/** Isolation test: Earth only, bypasses TexturePreloadContext. Direct useLoader → meshStandardMaterial map. */
-export function PlanetEarthDirectLoaderTest(props: PlanetProps) {
-  const {
-    planetId,
-    planetName,
-    orbitRadius,
-    size,
-    orbitalPeriodDays,
-    rotationPeriodDays,
-    inclinationDeg,
-  } = props
-  const groupRef = useRef<Group>(null)
-  const meshRef = useRef<Mesh>(null)
-  const simulationTimeDays = useSimulationStore((s) => s.simulationTimeDays)
-  const hoveredPlanet = useSimulationStore((s) => s.hoveredPlanet)
-  const texture = useLoader(TextureLoader, '/textures/earth/diffuse.jpg')
-  const config = PLANET_MATERIAL_CONFIG.earth
-  const onPointerDown = usePlanetClick('earth', groupRef)
-  const hoverHandlers = usePlanetHover('earth')
-
-  useFrame(() => {
-    if (!groupRef.current) return
-    const angle = orbitAngleRad(simulationTimeDays, orbitalPeriodDays)
-    const pos = getOrbitPositionWithInclination(orbitRadius, angle, inclinationDeg)
-    groupRef.current.position.copy(pos)
-    const rotAngle = rotationAngleRad(simulationTimeDays, rotationPeriodDays)
-    if (meshRef.current) meshRef.current.rotation.y = rotAngle
-  })
-
-  return (
-    <group ref={groupRef}>
-      <mesh
-        ref={meshRef}
-        name={planetId}
-        onPointerDown={onPointerDown}
-        onPointerOver={hoverHandlers.onPointerOver}
-        onPointerOut={hoverHandlers.onPointerOut}
-      >
-        <sphereGeometry args={[size, 64, 64]} />
-        <meshStandardMaterial
-          map={texture}
-          color="#ffffff"
-          roughness={config.roughness}
-          metalness={config.metalness}
-          envMapIntensity={0.4}
-        />
-      </mesh>
-      {config.hasClouds && <EarthCloudLayer radius={size} rotationSpeed={0.98} />}
-      {config.hasAtmosphere && (
-        <EarthAtmosphere radius={size} color="#4a7ba7" power={1.4} intensity={0.35} />
-      )}
-      <mesh
-        name={`${planetId}-hit`}
-        onPointerDown={onPointerDown}
-        onPointerOver={hoverHandlers.onPointerOver}
-        onPointerOut={hoverHandlers.onPointerOut}
-      >
-        <sphereGeometry args={[size * HIT_SCALE, 16, 16]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-      <PlanetLabel name={planetName} visible={hoveredPlanet === planetId} />
-    </group>
-  )
-}
 
 export type PlanetProps = {
   planetId: string

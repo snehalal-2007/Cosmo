@@ -149,13 +149,13 @@ export function Planet({
         <EarthCloudLayer radius={size} rotationSpeed={0.98} />
       )}
 
-      {/* Earth / Neptune: atmospheric rim glow */}
-      {hasAtmosphere && (
+      {/* Neptune only: atmospheric rim glow (Earth’s blue rim removed per request) */}
+      {hasAtmosphere && planetId === 'neptune' && (
         <EarthAtmosphere
           radius={size}
-          color={planetId === 'neptune' ? '#4166a8' : '#4a7ba7'}
-          power={planetId === 'neptune' ? 1.3 : 1.4}
-          intensity={planetId === 'neptune' ? 0.2 : 0.35}
+          color="#4166a8"
+          power={1.3}
+          intensity={0.2}
         />
       )}
 

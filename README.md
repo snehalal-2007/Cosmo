@@ -1,6 +1,6 @@
 # Cosmo
 
-**Cosmo** is a high-fidelity space visualization app built with React and Three.js. It offers two main modes: an interactive **Solar System** and a **Constellations** planetarium, with a clean, modern interface and smooth camera controls.
+**🌌Cosmo** is a high-fidelity space visualization app built with React and Three.js. It offers two main modes: an interactive **Solar System** and a **Constellations** planetarium, with a clean, modern interface and smooth camera controls.
 
 ---
 
@@ -13,15 +13,15 @@ All motion is driven by a central simulation clock where applicable; there are n
 
 ---
 
-## Features
+## ✨ Features
 
-- **Solar System:** Sun and planets (including Earth’s Moon), PBR materials, orbital paths, time controls, planet nav, info panel, minimap.
-- **Constellations:** RA/Dec star catalog, constellation line overlays, cardinal directions and ring, click-in-sky to select constellation, star bubbles with details, smooth zoom to constellation or star, toggle back on second click.
+- **Solar System** — Sun and planets (including Earth’s Moon), PBR materials, orbital paths, time controls, planet nav, info panel, minimap.
+- **Constellations** — RA/Dec star catalog, constellation line overlays, cardinal directions and ring, click-in-sky to select constellation, star bubbles with details, smooth zoom to constellation or star, toggle back on second click.
 - **Shared:** Full-screen WebGL canvas, responsive UI, mode switcher (AppNav).
 
 ---
 
-## Quick start
+## 🚀 Quick start
 
 ```bash
 npm install
@@ -37,7 +37,7 @@ npm run preview # Preview production build
 
 ---
 
-## Tech stack
+## 🛠️ Tech stack
 
 - **React 19** + **TypeScript**
 - **Vite** — build and dev server
@@ -50,7 +50,7 @@ npm run preview # Preview production build
 
 ---
 
-## Project structure (high level)
+## 📁 Project structure (high level)
 
 - `src/App.tsx` — Root app, mode switch, Canvas and UI layout.
 - `src/components/canvas/` — Solar System scene (Sun, planets, Moon, orbits, materials).

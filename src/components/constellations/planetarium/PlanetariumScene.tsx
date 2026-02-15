@@ -13,6 +13,7 @@ import { SelectedConstellationStarLabels } from './SelectedConstellationStarLabe
 import { CardinalDirections } from './CardinalDirections'
 import { CardinalRing } from './CardinalRing'
 import { SkyCameraController } from './SkyCameraController'
+import { ConstellationSkyClick } from './ConstellationSkyClick'
 import type { Group } from 'three'
 import type { ConstellationCatalogEntry } from '../../../data/constellationCatalog'
 
@@ -21,6 +22,7 @@ export type PlanetariumSceneProps = {
   showConstellationNames: boolean
   selectedConstellation: ConstellationCatalogEntry | null
   selectedStarId: string | null
+  onSkyConstellationSelect?: (con: ConstellationCatalogEntry) => void
 }
 
 export function PlanetariumScene({
@@ -28,6 +30,7 @@ export function PlanetariumScene({
   showConstellationNames,
   selectedConstellation,
   selectedStarId,
+  onSkyConstellationSelect,
 }: PlanetariumSceneProps) {
   const skyGroupRef = useRef<Group>(null)
   const { scene } = useThree()
@@ -54,6 +57,9 @@ export function PlanetariumScene({
         selectedConstellation={selectedConstellation}
         selectedStarId={selectedStarId}
       />
+      {onSkyConstellationSelect != null && (
+        <ConstellationSkyClick onSelectConstellation={onSkyConstellationSelect} />
+      )}
     </>
   )
 }

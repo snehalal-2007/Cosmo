@@ -24,6 +24,11 @@ export function ConstellationsPage() {
     setSelectedStar(null)
   }, [])
 
+  const handleSkyConstellationSelect = useCallback((con: ConstellationCatalogEntry) => {
+    setSelectedConstellation(con)
+    setSelectedStar(null)
+  }, [])
+
   const filteredAndSortedConstellations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
     let list = q
@@ -45,6 +50,7 @@ export function ConstellationsPage() {
           showConstellationNames={showConstellationNames}
           selectedConstellation={selectedConstellation}
           selectedStarId={selectedStar?.id ?? null}
+          onSkyConstellationSelect={handleSkyConstellationSelect}
         />
       </Canvas>
 

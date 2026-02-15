@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# Cosmo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Cosmo** is a high-fidelity space visualization app built with React and Three.js. It offers two main modes: an interactive **Solar System** and a **Constellations** planetarium, with a clean, modern interface and smooth camera controls.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What is Cosmo?
 
-## React Compiler
+- **Solar System mode** — Navigate the Sun and planets in 3D. Click any body to focus the camera and open an info panel with facts, mythology, and a daily fact. Control simulation time (play, pause, speed), toggle scale realism, and use the minimap for orientation.
+- **Constellations mode** — A full celestial sphere planetarium. View catalog stars and constellation lines, rotate the sky by dragging, zoom with scroll, and use the searchable constellation list. Click a constellation (in the list or in the sky) to zoom to it and open its description; click star bubbles to zoom to individual stars and see details.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+All motion is driven by a central simulation clock where applicable; there are no hardcoded looping animations.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Solar System:** Sun and planets (including Earth’s Moon), PBR materials, orbital paths, time controls, planet nav, info panel, minimap.
+- **Constellations:** RA/Dec star catalog, constellation line overlays, cardinal directions and ring, click-in-sky to select constellation, star bubbles with details, smooth zoom to constellation or star, toggle back on second click.
+- **Shared:** Full-screen WebGL canvas, responsive UI, mode switcher (AppNav).
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Quick start
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://localhost:5173](http://localhost:5173). Use the top nav to switch between **Solar System** and **Constellations**.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build   # Production build
+npm run preview # Preview production build
 ```
+
+---
+
+## Tech stack
+
+- **React 19** + **TypeScript**
+- **Vite** — build and dev server
+- **Three.js** — 3D rendering
+- **React Three Fiber** — React renderer for Three
+- **@react-three/drei** — helpers (Line, Html, Stars, etc.)
+- **Zustand** — app and simulation state
+- **Framer Motion** — UI animations
+- **Tailwind CSS** — styling
+
+---
+
+## Project structure (high level)
+
+- `src/App.tsx` — Root app, mode switch, Canvas and UI layout.
+- `src/components/canvas/` — Solar System scene (Sun, planets, Moon, orbits, materials).
+- `src/components/constellations/` — Constellations page and planetarium (sky, stars, lines, click handling).
+- `src/components/ui/` — HUD, panels, nav, controls.
+- `src/data/` — Planet data, constellation catalog, star catalog.
+- `src/store/` — View mode and simulation state.
+- `src/utils/` — Orbital math, celestial sphere (RA/Dec), helpers.
+
+For architecture, data flow, and how to work on the codebase, see **[DEVELOPERS.md](./DEVELOPERS.md)**.

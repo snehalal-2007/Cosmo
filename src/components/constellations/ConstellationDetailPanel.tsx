@@ -1,19 +1,52 @@
 /**
  * Cosmo – Constellation info panel (glassmorphism, slide-in).
- * Matches InfoPanel design language: name, description, mythology, brightest star, distance.
+ * Name, description, mythology, brightest star, distance; stars list + clickable star details.
  */
+import { useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { ConstellationCatalogEntry } from '../../data/constellationCatalog'
+import { getStarById } from '../../data/starCatalog'
+import type { StarRecord } from '../../data/starCatalog'
+
+function formatStarDisplayName(id: string): string {
+  return id
+    .split(/[- ]/)
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+    .join(' ')
+}
 
 type ConstellationDetailPanelProps = {
   constellation: ConstellationCatalogEntry | null
+  selectedStar: StarRecord | null
+  onSelectStar: (star: StarRecord | null) => void
   onClose: () => void
 }
 
 export function ConstellationDetailPanel({
   constellation,
+  selectedStar,
+  onSelectStar,
   onClose,
 }: ConstellationDetailPanelProps) {
+  const constellationStars = useMemo(() => {
+    if (!constellation) return []
+    const ids = new Set<string>()
+    for (const [a, b] of constellation.lineSegments) {
+      ids.add(a)
+      ids.add(b)
+    }
+    const stars: StarRecord[] = []
+    ids.forEach((id) => {
+      const star = getStarById(id)
+      if (star) {
+        stars.push(star)
+      } else if (import.meta.env.DEV) {
+        console.warn(`[ConstellationDetailPanel] Star not in catalog: "${id}" (constellation: ${constellation.name})`)
+      }
+    })
+    return stars.sort((a, b) => formatStarDisplayName(a.id).localeCompare(formatStarDisplayName(b.id)))
+  }, [constellation])
+
   return (
     <AnimatePresence>
       {constellation && (
@@ -78,6 +111,55 @@ export function ConstellationDetailPanel({
                 <p className="font-mono">
                   {constellation.distanceLy.toLocaleString()} light-years
                 </p>
+              </section>
+            )}
+
+            <section>
+              <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-white/60">
+                ⭐ Stars in this Constellation
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {constellationStars.map((star) => {
+                  const isSelected = selectedStar?.id === star.id
+                  return (
+                    <button
+                      key={star.id}
+                      type="button"
+                      onClick={() =>
+                        onSelectStar(isSelected ? null : star)
+                      }
+                      className={`rounded-full px-3 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:scale-105 ${
+                        isSelected
+                          ? 'bg-sky-400/40 ring-1 ring-sky-300/60 shadow-[0_0_12px_rgba(56,189,248,0.25)]'
+                          : 'bg-white/10 hover:bg-white/20 hover:ring-1 hover:ring-white/20'
+                      }`}
+                    >
+                      {formatStarDisplayName(star.id)}
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+
+            {selectedStar && (
+              <section className="rounded-md border border-white/10 bg-white/5 p-3">
+                <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-white/60">
+                  🌟 Star Details
+                </h3>
+                <div className="space-y-1.5 text-sm">
+                  <p>
+                    <span className="text-white/60">Name</span>{' '}
+                    <span className="font-medium text-white">
+                      {formatStarDisplayName(selectedStar.id)}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-white/60">Magnitude</span>{' '}
+                    <span className="font-mono text-white">
+                      {selectedStar.magnitude.toFixed(2)}
+                    </span>
+                  </p>
+                </div>
               </section>
             )}
           </div>

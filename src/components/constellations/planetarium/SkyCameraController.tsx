@@ -1,6 +1,6 @@
 /**
  * Cosmo – Planetarium camera: drag to rotate sky, scroll to zoom (FOV).
- * Full 360° spherical rotation via quaternions. Drag direction matches motion. Camera stays at origin.
+ * Smooth focus to constellation or selected star (time-based animation). Camera stays at origin.
  */
 import { useRef, useCallback, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
@@ -17,7 +17,8 @@ const FOV_SENSITIVITY = 2
 const ROTATION_SENSITIVITY = 0.004
 const INERTIA_DAMPING = 0.95
 const FOCUS_FOV = 30
-const FOCUS_LERP = 0.04
+const STAR_FOCUS_FOV = 48
+const FOCUS_DURATION_MS = 1000
 const FOV_LERP = 0.05
 
 const WORLD_Y = new Vector3(0, 1, 0)
@@ -47,31 +48,75 @@ function computeConstellationCenter(con: ConstellationCatalogEntry): Vector3 | n
   return sum
 }
 
+function getStarDirection(starId: string): Vector3 | null {
+  const star = getStarById(starId)
+  if (!star) return null
+  const v = raDecToCartesian(star.ra, star.dec)
+  return v.normalize()
+}
+
 type SkyCameraControllerProps = {
   skyGroupRef: React.RefObject<Group | null>
   selectedConstellation: ConstellationCatalogEntry | null
+  selectedStarId: string | null
 }
 
-export function SkyCameraController({ skyGroupRef, selectedConstellation }: SkyCameraControllerProps) {
+export function SkyCameraController({
+  skyGroupRef,
+  selectedConstellation,
+  selectedStarId,
+}: SkyCameraControllerProps) {
   const { camera, gl } = useThree()
   const isDragging = useRef(false)
   const prevPointer = useRef({ x: 0, y: 0 })
   const velocity = useRef({ x: 0, y: 0 })
   const targetQuat = useRef<Quaternion | null>(null)
+  const focusStartQuat = useRef<Quaternion | null>(null)
+  const focusStartTime = useRef(0)
+  const focusTargetFov = useRef(75)
+  const focusAnimationPending = useRef(false)
   const quatY = useRef(new Quaternion())
   const quatX = useRef(new Quaternion())
+  const forward = useRef(new Vector3(0, 0, -1))
 
   useEffect(() => {
-    if (!selectedConstellation) {
-      targetQuat.current = null
+    if (selectedStarId) {
+      const direction = getStarDirection(selectedStarId)
+      if (direction) {
+        focusTargetFov.current = STAR_FOCUS_FOV
+        const q = new Quaternion()
+        q.setFromUnitVectors(direction, forward.current)
+        targetQuat.current = q
+        focusAnimationPending.current = true
+      }
       return
     }
+    if (selectedConstellation) {
+      const center = computeConstellationCenter(selectedConstellation)
+      if (center) {
+        focusTargetFov.current = FOCUS_FOV
+        const q = new Quaternion()
+        q.setFromUnitVectors(center, forward.current)
+        targetQuat.current = q
+        focusAnimationPending.current = true
+      }
+      return
+    }
+    targetQuat.current = null
+    focusStartQuat.current = null
+    focusAnimationPending.current = false
+  }, [selectedStarId, selectedConstellation])
+
+  useEffect(() => {
+    if (!selectedConstellation) return
+    if (selectedStarId != null) return
     const center = computeConstellationCenter(selectedConstellation)
     if (!center) return
+    focusTargetFov.current = FOCUS_FOV
     const q = new Quaternion()
-    const forward = new Vector3(0, 0, -1)
-    q.setFromUnitVectors(center, forward)
+    q.setFromUnitVectors(center, forward.current)
     targetQuat.current = q
+    focusAnimationPending.current = true
   }, [selectedConstellation])
 
   useFrame(() => {
@@ -80,8 +125,23 @@ export function SkyCameraController({ skyGroupRef, selectedConstellation }: SkyC
     if (!group) return
 
     if (targetQuat.current != null) {
-      group.quaternion.slerp(targetQuat.current, FOCUS_LERP)
-      cam.fov += (FOCUS_FOV - cam.fov) * FOV_LERP
+      if (focusAnimationPending.current) {
+        focusStartQuat.current = group.quaternion.clone()
+        focusStartTime.current = Date.now()
+        focusAnimationPending.current = false
+      }
+      const startQuat = focusStartQuat.current
+      if (startQuat) {
+        const t = Math.min(1, (Date.now() - focusStartTime.current) / FOCUS_DURATION_MS)
+        const ease = 1 - (1 - t) * (1 - t)
+        group.quaternion.copy(startQuat).slerp(targetQuat.current!, ease)
+        if (t >= 1) {
+          group.quaternion.copy(targetQuat.current!)
+          focusStartQuat.current = null
+          targetQuat.current = null
+        }
+      }
+      cam.fov += (focusTargetFov.current - cam.fov) * FOV_LERP
       cam.updateProjectionMatrix()
       velocity.current.x = 0
       velocity.current.y = 0
@@ -101,6 +161,9 @@ export function SkyCameraController({ skyGroupRef, selectedConstellation }: SkyC
 
   const handlePointerDown = useCallback((e: PointerEvent) => {
     isDragging.current = true
+    targetQuat.current = null
+    focusStartQuat.current = null
+    focusAnimationPending.current = false
     prevPointer.current = { x: e.clientX, y: e.clientY }
     velocity.current = { x: 0, y: 0 }
   }, [])

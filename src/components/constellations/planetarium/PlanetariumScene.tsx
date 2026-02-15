@@ -20,12 +20,14 @@ export type PlanetariumSceneProps = {
   showConstellationLines: boolean
   showConstellationNames: boolean
   selectedConstellation: ConstellationCatalogEntry | null
+  selectedStarId: string | null
 }
 
 export function PlanetariumScene({
   showConstellationLines,
   showConstellationNames,
   selectedConstellation,
+  selectedStarId,
 }: PlanetariumSceneProps) {
   const skyGroupRef = useRef<Group>(null)
   const { scene } = useThree()
@@ -38,7 +40,7 @@ export function PlanetariumScene({
     <>
       <group ref={skyGroupRef}>
         <Stars radius={120} depth={80} count={4000} factor={4} saturation={0.6} fade speed={0.2} />
-        <StarRenderer />
+        <StarRenderer selectedStarId={selectedStarId} />
         {showConstellationLines && <ConstellationOverlay />}
         {showConstellationNames && <ConstellationNamesOverlay />}
         {selectedConstellation && (
@@ -50,6 +52,7 @@ export function PlanetariumScene({
       <SkyCameraController
         skyGroupRef={skyGroupRef}
         selectedConstellation={selectedConstellation}
+        selectedStarId={selectedStarId}
       />
     </>
   )

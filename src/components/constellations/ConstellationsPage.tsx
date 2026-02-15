@@ -9,15 +9,20 @@ import { PlanetariumScene } from './planetarium/PlanetariumScene'
 import { ConstellationDetailPanel } from './ConstellationDetailPanel'
 import { CONSTELLATION_CATALOG } from '../../data/constellationCatalog'
 import type { ConstellationCatalogEntry } from '../../data/constellationCatalog'
+import type { StarRecord } from '../../data/starCatalog'
 
 export function ConstellationsPage() {
   const [showConstellationLines, setShowConstellationLines] = useState(true)
   const [showConstellationNames, setShowConstellationNames] = useState(false)
   const [selectedConstellation, setSelectedConstellation] =
     useState<ConstellationCatalogEntry | null>(null)
+  const [selectedStar, setSelectedStar] = useState<StarRecord | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const handleClosePanel = useCallback(() => setSelectedConstellation(null), [])
+  const handleClosePanel = useCallback(() => {
+    setSelectedConstellation(null)
+    setSelectedStar(null)
+  }, [])
 
   const filteredAndSortedConstellations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
@@ -39,6 +44,7 @@ export function ConstellationsPage() {
           showConstellationLines={showConstellationLines}
           showConstellationNames={showConstellationNames}
           selectedConstellation={selectedConstellation}
+          selectedStarId={selectedStar?.id ?? null}
         />
       </Canvas>
 
@@ -107,6 +113,8 @@ export function ConstellationsPage() {
 
       <ConstellationDetailPanel
         constellation={selectedConstellation}
+        selectedStar={selectedStar}
+        onSelectStar={setSelectedStar}
         onClose={handleClosePanel}
       />
     </div>

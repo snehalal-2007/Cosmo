@@ -1,8 +1,8 @@
 /**
  * Cosmo – Renders catalog stars as visible circular points on the celestial sphere.
- * THREE.Points + BufferGeometry + ShaderMaterial. Perfect circles via gl_PointCoord; no textures.
+ * Highlights the star matching selectedStarId (size + brightness + glow) via shader uniform.
  */
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import {
   BufferGeometry,
   Float32BufferAttribute,
@@ -31,15 +31,21 @@ function magnitudeToSize(magnitude: number): number {
 
 const vertexShader = /* glsl */ `
   attribute float size;
+  attribute float index;
+  uniform float uSelectedIndex;
+  varying float vSelected;
   void main() {
+    vSelected = (uSelectedIndex >= 0.0 && index == uSelectedIndex) ? 1.0 : 0.0;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mvPosition;
     float scale = 800.0 / max(1.0, -mvPosition.z);
-    gl_PointSize = size * scale;
+    float baseSize = size + 2.0 * vSelected;
+    gl_PointSize = baseSize * scale;
   }
 `
 
 const fragmentShader = /* glsl */ `
+  varying float vSelected;
   void main() {
     vec2 c = gl_PointCoord - 0.5;
     float d = length(c) * 2.0;
@@ -49,28 +55,34 @@ const fragmentShader = /* glsl */ `
     float glow = exp(-d * 1.2) * 0.5;
     float alpha = min(1.0, circle * 0.95 + glow);
     float brightness = 0.92 + 0.08 * sharpCore + 0.15 * glow;
-    vec3 white = vec3(1.0, 1.0, 1.0) * brightness;
-    gl_FragColor = vec4(white, alpha);
+    float highlightGlow = vSelected * exp(-d * 0.8) * 0.4;
+    float highlightBright = vSelected * 0.35;
+    vec3 white = vec3(1.0, 1.0, 1.0) * (brightness + highlightBright);
+    gl_FragColor = vec4(white, min(1.0, alpha + highlightGlow));
   }
 `
 
-export function StarRenderer() {
-  const { positions, sizes } = useMemo(() => {
+export function StarRenderer({ selectedStarId }: { selectedStarId: string | null }) {
+  const selectedIndex = useMemo(
+    () => (selectedStarId ? STAR_CATALOG.findIndex((s) => s.id === selectedStarId) : -1),
+    [selectedStarId]
+  )
+
+  const { positions, sizes, indices } = useMemo(() => {
     const pos: number[] = []
     const siz: number[] = []
-    let count = 0
+    const idx: number[] = []
+    let i = 0
     for (const star of STAR_CATALOG) {
       const v = raDecToCartesian(star.ra, star.dec)
       pos.push(v.x * SPHERE_RADIUS, v.y * SPHERE_RADIUS, v.z * SPHERE_RADIUS)
       siz.push(magnitudeToSize(star.magnitude))
-      count++
-    }
-    if (typeof console !== 'undefined') {
-      console.log('[StarRenderer] stars added to buffers:', count)
+      idx.push(i++)
     }
     return {
       positions: new Float32Array(pos),
       sizes: new Float32Array(siz),
+      indices: new Float32Array(idx),
     }
   }, [])
 
@@ -78,12 +90,20 @@ export function StarRenderer() {
     const g = new BufferGeometry()
     g.setAttribute('position', new Float32BufferAttribute(positions, 3))
     g.setAttribute('size', new Float32BufferAttribute(sizes, 1))
+    g.setAttribute('index', new Float32BufferAttribute(indices, 1))
     return g
-  }, [positions, sizes])
+  }, [positions, sizes, indices])
+
+  const uniforms = useMemo(() => ({ uSelectedIndex: { value: -1 } }), [])
+
+  useEffect(() => {
+    uniforms.uSelectedIndex.value = selectedIndex
+  }, [selectedIndex, uniforms])
 
   const material = useMemo(
     () =>
       new ShaderMaterial({
+        uniforms,
         vertexShader,
         fragmentShader,
         transparent: true,
@@ -92,7 +112,7 @@ export function StarRenderer() {
         depthTest: true,
         blending: AdditiveBlending,
       }),
-    []
+    [uniforms]
   )
 
   return (

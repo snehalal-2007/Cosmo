@@ -1,6 +1,6 @@
-# Cosmo
+# 🌌Cosmo
 
-**🌌Cosmo** is a high-fidelity space visualization app built with React and Three.js. It offers two main modes: an interactive **Solar System** and a **Constellations** planetarium, with a clean, modern interface and smooth camera controls.
+**Cosmo** is a high-fidelity space visualization app built with React and Three.js. It offers two main modes: an interactive **Solar System** and a **Constellations** planetarium, with a clean, modern interface and smooth camera controls.
 
 ---
 
